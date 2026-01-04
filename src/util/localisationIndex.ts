@@ -84,12 +84,13 @@ export async function getLocalisedText(localisationKey: string | undefined, lang
     const langKey = localeMapping[language.toLowerCase()] || 'l_english'; // use mapping to get language suffix
     const defaultLangKey = 'l_english';
 
-    let text = globalLocalisationIndex[langKey]?.[localisationKey] ||
-        workspaceLocalisationIndex[langKey]?.[localisationKey];
+    // Layering semantics: workspace (incl. dependencies) overrides vanilla.
+    let text = workspaceLocalisationIndex[langKey]?.[localisationKey] ||
+        globalLocalisationIndex[langKey]?.[localisationKey];
 
     if (!text) {
-        text = globalLocalisationIndex[defaultLangKey]?.[localisationKey] ||
-            workspaceLocalisationIndex[defaultLangKey]?.[localisationKey];
+        text = workspaceLocalisationIndex[defaultLangKey]?.[localisationKey] ||
+            globalLocalisationIndex[defaultLangKey]?.[localisationKey];
     }
 
     return text ?? localisationKey;

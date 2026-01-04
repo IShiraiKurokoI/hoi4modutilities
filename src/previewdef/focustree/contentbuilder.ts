@@ -204,7 +204,9 @@ async function renderFocus(focus: Focus, styleTable: StyleTable, gfxFiles: strin
         const iconObject = iconName ? await getFocusIcon(iconName, gfxFiles) : null;
         styleTable.style('focus-icon-' + normalizeForStyle(iconName ?? '-empty'), () => 
             `${iconObject ? `background-image: url(${iconObject.uri});` : 'background: grey;'}
-            background-size: ${iconObject ? iconObject.width: 0}px;`
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;`
         );
     }
     
@@ -230,8 +232,7 @@ async function renderFocus(focus: Focus, styleTable: StyleTable, gfxFiles: strin
         navigator
         {{iconClass}}
         ${styleTable.style('focus-common', () => `
-            background-position-x: center;
-            background-position-y: calc(50% - 18px);
+            background-position: center center;
             background-repeat: no-repeat;
             width: 100%;
             height: 100%;

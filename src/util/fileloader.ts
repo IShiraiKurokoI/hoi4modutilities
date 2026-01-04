@@ -13,6 +13,7 @@ import { UserError } from './common';
 import type * as AdmZip from 'adm-zip';
 import { Hoi4FsSchema } from '../constants';
 import { trimStart } from 'lodash';
+import { getDependencyLayersHighToLowPriority } from './moddependencies';
 
 const dlcZipPathsCache = new PromiseCache({
     factory: getDlcZipPaths,
@@ -91,6 +92,40 @@ export async function getFilePathFromModOrHOI4(relativePath: string, options?: {
             const relativePathDir = path.dirname(relativePath);
             for (const replacePath of replacePaths) {
                 if (isSamePath(relativePathDir, replacePath)) {
+                    return absolutePath;
+                }
+            }
+        }
+
+        // Find in dependency mods (resolved from HOI4 user mod index directory)
+        // Search order: high -> low priority (closest dependency first).
+        const dependencyLayers = await getDependencyLayersHighToLowPriority();
+        if (dependencyLayers.length > 0) {
+            const relativePathDir = path.dirname(relativePath);
+
+            const replacedByLaterMods = new Set<string>((replacePaths ?? []).map(p => p));
+
+            for (const dep of dependencyLayers) {
+                // If any higher-priority mod has replaced this directory, stop searching older sources.
+                for (const rp of replacedByLaterMods) {
+                    if (isSamePath(relativePathDir, rp)) {
+                        return absolutePath;
+                    }
+                }
+
+                const findPath = vscode.Uri.joinPath(dep.root, relativePath);
+                if (await isFile(findPath)) {
+                    return findPath;
+                }
+
+                for (const rp of dep.replacePaths) {
+                    replacedByLaterMods.add(rp);
+                }
+            }
+
+            // Stop searching HOI4 base if replaced by any dependency.
+            for (const rp of replacedByLaterMods) {
+                if (isSamePath(relativePathDir, rp)) {
                     return absolutePath;
                 }
             }
@@ -234,9 +269,40 @@ export async function listFilesFromModOrHOI4(relativePath: string, options?: { m
         }
 
         const replacePaths = await getReplacePaths();
+        const replacedByLaterMods = new Set<string>((replacePaths ?? []).map(p => p));
         if (replacePaths) {
             for (const replacePath of replacePaths) {
                 if (isSamePath(relativePath, replacePath)) {
+                    return result.filter((v, i, a) => i === a.indexOf(v));
+                }
+            }
+        }
+
+        // Find in dependency mods (resolved from HOI4 user mod index directory)
+        const dependencyLayers = await getDependencyLayersHighToLowPriority();
+        if (dependencyLayers.length > 0) {
+            for (const dep of dependencyLayers) {
+                // If any higher-priority mod has replaced this directory, stop searching older sources.
+                for (const rp of replacedByLaterMods) {
+                    if (isSamePath(relativePath, rp)) {
+                        return result.filter((v, i, a) => i === a.indexOf(v));
+                    }
+                }
+
+                const findPath = vscode.Uri.joinPath(dep.root, relativePath);
+                if (await isDirectory(findPath)) {
+                    try {
+                        result.push(...await readFunction(findPath));
+                    } catch(e) {}
+                }
+
+                for (const rp of dep.replacePaths) {
+                    replacedByLaterMods.add(rp);
+                }
+            }
+
+            for (const rp of replacedByLaterMods) {
+                if (isSamePath(relativePath, rp)) {
                     return result.filter((v, i, a) => i === a.indexOf(v));
                 }
             }

@@ -27,7 +27,10 @@
 		"onCommand:hoi4modutilities.previewworld",
 		"onCommand:hoi4modutilities.scanreferences",
 		"onCommand:hoi4modutilities.selectmodfile",
+		"onCommand:hoi4modutilities.showmoddependencytree",
 		"onCommand:hoi4modutilities.selecthoifolder",
+		"onView:hoi4modutilities-modDependencyTree",
+		"onView:hoi4modutilities-mergedGameFiles",
 		"onCustomEditor:hoi4modutilities.dds",
 		"onCustomEditor:hoi4modutilities.tga",
 		"onWebviewPanel:hoi4ftpreview",
@@ -47,10 +50,38 @@
 	},
 	"locale": "%hoi4modutilities.locale%",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "hoi4modutilities-modlayers",
+					"title": "%hoi4modutilities.modlayers.title%",
+					"icon": "static/preview-right.svg"
+				}
+			]
+		},
+		"views": {
+			"hoi4modutilities-modlayers": [
+				{
+					"id": "hoi4modutilities-modDependencyTree",
+					"name": "%hoi4modutilities.modDependencyTree.title%",
+					"type": "webview"
+				},
+				{
+					"id": "hoi4modutilities-mergedGameFiles",
+					"name": "%hoi4modutilities.mergedGameFiles.title%"
+				}
+			]
+		},
 		"configuration": [
 			{
 				"title": "%hoi4modutilities.displayName%",
 				"properties": {
+					"hoi4ModUtilities.userModDirectory": {
+						"title": "%hoi4modutilities.userModDirectory.title%",
+						"type": "string",
+						"default": "",
+						"description": "%hoi4modutilities.userModDirectory.desc%"
+					},
 					"hoi4ModUtilities.installPath": {
 						"title": "%hoi4modutilities.installPath.title%",
 						"type": "string",
@@ -104,6 +135,11 @@
 			{
 				"command": "hoi4modutilities.selectmodfile",
 				"title": "%hoi4modutilities.selectmodfile.title%",
+				"category": "%hoi4modutilities.category%"
+			},
+			{
+				"command": "hoi4modutilities.showmoddependencytree",
+				"title": "%hoi4modutilities.showmoddependencytree.title%",
 				"category": "%hoi4modutilities.category%"
 			},
 			{

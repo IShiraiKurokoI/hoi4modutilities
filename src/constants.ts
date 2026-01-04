@@ -22,6 +22,7 @@ export namespace Commands {
     export const ScanReferences = 'hoi4modutilities.scanreferences';
     export const SelectModFile = 'hoi4modutilities.selectmodfile';
     export const SelectHoiFolder = 'hoi4modutilities.selecthoifolder';
+    export const ShowModDependencyTree = 'hoi4modutilities.showmoddependencytree';
 }
 
 export namespace WebviewType {

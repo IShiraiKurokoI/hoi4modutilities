@@ -13,6 +13,9 @@ import { registerGfxIndex } from './util/gfxindex';
 import { Logger } from "./util/logger";
 import { registerLocalisationIndex } from "./util/localisationIndex";
 import { registerSharedFocusIndex } from "./util/sharedFocusIndex";
+import { registerModDependencyTreeCommand } from './util/moddependencies';
+import { registerModDependencyGraphView } from './views/modDependencyGraphView';
+import { registerMergedGameFilesView } from './views/mergedGameFilesView';
 
 export function activate(context: vscode.ExtensionContext) {
     let locale = (context as any).extension?.packageJSON.locale;
@@ -41,11 +44,13 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(registerSharedFocusIndex());
     context.subscriptions.push(registerGfxIndex());
     context.subscriptions.push(registerLocalisationIndex());
+    context.subscriptions.push(registerModDependencyTreeCommand());
+    context.subscriptions.push(registerModDependencyGraphView(context));
+    context.subscriptions.push(registerMergedGameFilesView());
 
     if (process.env.NODE_ENV !== 'production') {
         vscode.commands.registerCommand('hoi4modutilities.test', () => {
-            const debugModule = require('./util/debug.shouldignore');
-            debugModule.testCommand();
+            vscode.window.showInformationMessage('hoi4modutilities.test: dev test command executed.');
         });
 
         setVscodeContext(ContextName.Hoi4MUInDev, true);
